@@ -17,6 +17,7 @@ export class LoansController {
         return this.loanService.findOne(id)
     }
 
+
     @Post()
     create(@Body(ValidationPipe) dto: CreateLoanDto){
         return this.loanService.create(dto)

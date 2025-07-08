@@ -1,7 +1,10 @@
-document.getElementById('leadForm').addEventListener('submit', async function (e) {
+const form = document.getElementById("leadForm");
+const alertBox = document.getElementById("alert");
+const leadsList = document.getElementById("leadsList");
+
+form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const form = e.target;
   const formData = new FormData();
 
   const lead = {
@@ -11,43 +14,84 @@ document.getElementById('leadForm').addEventListener('submit', async function (e
     email: form.email.value,
     dob: form.dob.value,
     pan_card: form.pan_card.value,
-    type: form.type.value,
+    type: form.type.value
   };
 
   const business = {
     business_name: form.business_name.value,
     business_type: form.business_type.value,
     gst_number: form.gst_number.value,
-    turnover: parseFloat(form.turnover.value),
+    turnover: Number(form.turnover.value)
   };
 
   const loan = {
-    amount: parseFloat(form.amount.value),
-    tenure: parseInt(form.tenure.value),
-    interest_rate: parseFloat(form.interest_rate.value),
+    amount: Number(form.amount.value),
+    tenure: Number(form.tenure.value),
+    interest_rate: Number(form.interest_rate.value)
   };
 
-  const data = { lead, business, loan };
-
-  formData.append('data', JSON.stringify(data));
-  formData.append('panDoc', form.panDoc.files[0]);
-  formData.append('aadhaarDoc', form.aadhaarDoc.files[0]);
-  formData.append('gstDoc', form.gstDoc.files[0]);
+  formData.append("data", JSON.stringify({ lead, business, loan }));
+  formData.append("panDoc", form.panDoc.files[0]);
+  formData.append("aadhaarDoc", form.aadhaarDoc.files[0]);
+  formData.append("gstDoc", form.gstDoc.files[0]);
 
   try {
-    const response = await fetch('http://localhost:3000/workflow/execute/loan-application', {
-      method: 'POST',
-      body: formData
+    const res = await fetch("http://localhost:3000/workflow/execute/loan-application", {
+      method: "POST",
+      body: formData,
     });
 
-    const result = await response.json();
+    if (!res.ok) throw new Error("Submission failed");
 
-    if (response.ok) {
-      document.getElementById('status').innerText = '✅ Lead submitted successfully!';
-    } else {
-      document.getElementById('status').innerText = `❌ Error: ${result.message || 'Unknown error'}`;
-    }
+    alertBox.innerText = "✅ Lead submitted!";
+    alertBox.style.color = "green";
+    form.reset();
+    loadLeads();
   } catch (err) {
-    document.getElementById('status').innerText = `❌ Error submitting lead: ${err.message}`;
+    alertBox.innerText = "❌ Error submitting lead!";
+    alertBox.style.color = "red";
+    console.error(err);
   }
 });
+
+async function loadLeads() {
+  leadsList.innerHTML = "";
+
+  try {
+    const res = await fetch("http://localhost:3000/leads");
+    const leads = await res.json();
+
+    for (const lead of leads) {
+      const res = await fetch(`http://localhost:3000/loans/full/${lead.lead_id}`);
+      const full = await res.json();
+
+      const loan = full.loan || {};
+      const docs = full.documents || [];
+
+      const div = document.createElement("div");
+      div.className = "lead-card";
+      div.innerHTML = `
+        <strong>${lead.first_name} ${lead.last_name}</strong><br/>
+        Phone: ${lead.phone}<br/>
+        Email: ${lead.email}<br/>
+        Loan: ₹${loan.amount ?? 'N/A'} @ ${loan.interest_rate ?? 'N/A'}% for ${loan.tenure ?? 'N/A'} months<br/>
+        ${docs.map((doc, i) =>
+          `<a href="http://localhost:3000/documents/view/${doc.filename}" target="_blank">Document ${i + 1}</a>`
+        ).join(" | ")}<br/>
+        <button onclick="deleteLead(${lead.lead_id})">🗑️ Delete</button>
+      `;
+      leadsList.appendChild(div);
+    }
+  } catch (err) {
+    leadsList.innerText = "❌ Failed to load leads: " + err.message;
+    console.error(err);
+  }
+}
+
+async function deleteLead(id) {
+  if (!confirm("Delete this lead?")) return;
+  await fetch(`http://localhost:3000/leads/${id}`, { method: "DELETE" });
+  loadLeads();
+}
+
+window.onload = loadLeads;

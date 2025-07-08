@@ -3,57 +3,61 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>EasyLoans Application</title>
-  <link rel="stylesheet" href="styles.css" />
+  <title>EasyLoans - Lead Intake</title>
+  <link rel="stylesheet" href="styles.css"/>
 </head>
 <body>
   <div class="container">
-    <h1>Apply for a Loan</h1>
+    <h1>🧾 EasyLoans - Lead Intake</h1>
+
     <form id="leadForm" enctype="multipart/form-data">
-      <section>
-        <h2>Lead Info</h2>
+      <section class="form-section">
+        <h2>Customer</h2>
         <input name="first_name" placeholder="First Name" required />
         <input name="last_name" placeholder="Last Name" required />
         <input name="phone" placeholder="Phone Number" required />
         <input name="email" type="email" placeholder="Email" required />
-        <input name="dob" type="date" placeholder="Date of Birth" required />
-        <input name="pan_card" placeholder="PAN Card Number" required />
+        <input name="dob" type="date" required />
+        <input name="pan_card" placeholder="PAN Card" required />
         <select name="type" required>
-          <option value="">-- Select Type --</option>
+          <option value="">-- Type --</option>
           <option value="applicant">Applicant</option>
-          <option value="coapplicant">Co-Applicant</option>
+          <option value="co-applicant">Co-Applicant</option>
         </select>
       </section>
 
-      <section>
-        <h2>Business Info</h2>
+      <section class="form-section">
+        <h2>Business</h2>
         <input name="business_name" placeholder="Business Name" required />
         <input name="business_type" placeholder="Business Type" required />
         <input name="gst_number" placeholder="GST Number" required />
-        <input name="turnover" type="number" placeholder="Annual Turnover" required />
+        <input name="turnover" type="number" placeholder="Turnover" required />
       </section>
 
-      <section>
-        <h2>Loan Info</h2>
-        <input name="amount" type="number" placeholder="Loan Amount" required />
+      <section class="form-section">
+        <h2>Loan</h2>
+        <input name="amount" type="number" placeholder="Amount" required />
         <input name="tenure" type="number" placeholder="Tenure (months)" required />
-        <input name="interest_rate" type="number" step="0.1" placeholder="Interest Rate" required />
+        <input name="interest_rate" type="number" step="0.01" placeholder="Interest Rate" required />
       </section>
 
-      <section>
-        <h2>Upload Documents</h2>
-        <label>PAN Document</label>
-        <input type="file" name="panDoc" required />
-        <label>Aadhaar Document</label>
-        <input type="file" name="aadhaarDoc" required />
-        <label>GST Document</label>
-        <input type="file" name="gstDoc" required />
+      <section class="form-section">
+        <h2>Documents</h2>
+        <label>PAN</label>
+        <input type="file" name="panDoc" accept=".pdf,.jpg,.png" required />
+        <label>Aadhaar</label>
+        <input type="file" name="aadhaarDoc" accept=".pdf,.jpg,.png" required />
+        <label>GST</label>
+        <input type="file" name="gstDoc" accept=".pdf,.jpg,.png" required />
       </section>
 
       <button type="submit">Submit Application</button>
     </form>
 
-    <div id="status"></div>
+    <div id="alert"></div>
+
+    <h2 class="lead-heading">📋 All Leads</h2>
+    <div id="leadsList"></div>
   </div>
 
   <script src="script.js"></script>
